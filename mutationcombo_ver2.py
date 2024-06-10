@@ -29,8 +29,11 @@ df2 = pd.DataFrame({
     'score': scores
 })
 
+# scoreを高い順に並べ替え、上位100個を取得
+df2_sorted = df2.sort_values(by='score', ascending=False).head(100)
+
 # 出力ファイル名を指定してCSVファイルを保存
 output_file = 'hopeful_mutant.csv'
-df2.to_csv(output_file, index=False)
+df2_sorted.to_csv(output_file, index=False)
 
 print(f"CSVファイル '{output_file}' を作成しました。")
