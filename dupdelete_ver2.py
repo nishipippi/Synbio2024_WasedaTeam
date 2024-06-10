@@ -1,32 +1,39 @@
 import pandas as pd
+import itertools
 
-# CSVファイルを読み込む
-target_file = 'hopeful_point_mutation.xlsx'  # ファイルパスを適切に指定してください
-pointmutation_dupdel = 'pointmutation_dupdel.xlsx'
-df = pd.read_excel(target_file)
+# Excelファイルを読み込む
+file_path = 'pointmutation_dupdel.xlsx'
+df = pd.read_excel(file_path)
 
-# B列のデータからアルファベットを取り除いてE列にコピー
-df['point'] = df['mutation'].str.replace(r'[a-zA-Z]', '', regex=True)
+# mutation列とgain列のデータをリストとして取得
+mutations = df['mutation'].tolist()
+gains = df['gain'].tolist()
 
-# ポイントを分割してリスト化
-df['point_list'] = df['point'].str.split(':')
+# gain列のデータから3.719212132を引く
+adjusted_gains = [gain - 3.719212132 for gain in gains]
 
-# 重複を検出して行を削除する
-unique_points = set()
-rows_to_keep = []
+# 組み合わせを生成（最大3つまで）
+mutation_combinations = []
+scores = []
 
-for index, row in df.iterrows():
-    points = row['point_list']
-    if not any(point in unique_points for point in points):
-        rows_to_keep.append(index)
-        unique_points.update(points)
+for r in range(1, min(len(mutations), 3) + 1):
+    for combo in itertools.combinations(range(len(mutations)), r):
+        combo_mutations = ':'.join([mutations[i] for i in combo])
+        combo_score = sum([adjusted_gains[i] for i in combo])
+        mutation_combinations.append(combo_mutations)
+        scores.append(combo_score)
 
-df_filtered = df.loc[rows_to_keep]
+# 新しいデータフレームを作成
+df2 = pd.DataFrame({
+    'mutationcombo': mutation_combinations,
+    'score': scores
+})
 
-# 不要な列を削除
-df_filtered = df_filtered.drop(columns=['point_list'])
+# scoreを高い順に並べ替え、上位100個を取得
+df2_sorted = df2.sort_values(by='score', ascending=False).head(100)
 
-# 結果を新しいxlsxファイルに保存
-df_filtered.to_excel(pointmutation_dupdel, index=False)
+# 出力ファイル名を指定してCSVファイルを保存
+output_file = 'hopeful_mutant.csv'
+df2_sorted.to_csv(output_file, index=False)
 
-print(f"処理が完了しました。結果は{pointmutation_dupdel}に保存されています。")
+print(f"CSVファイル '{output_file}' を作成しました。")
