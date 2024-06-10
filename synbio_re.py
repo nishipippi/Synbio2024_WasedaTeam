@@ -9,7 +9,7 @@ df = pd.read_csv(input_file)
 
 # original_sequence_column と substitutions_column を適切な列名に変更
 original_sequence_column = 'original'  # A列の名前
-substitutions_column = 'mutation'      # B列の名前
+substitutions_column = 'mutationcombo'      # B列の名前
 
 # E列を準備（E列の初期値としてA列の配列をコピー）
 df['created sequence'] = df[original_sequence_column]  # E列に置換後の配列を格納するための列を追加
